@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Matcher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1e1e2f; /* Vibrant dark purple background */
+            color: #f8f9fa; /* Light text for readability */
+            font-family: 'Arial', sans-serif;
+        }
+        h2 {
+            color: #ff6f61; /* Vibrant coral for the header */
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 12px; /* More rounded input fields */
+            border: 2px solid #ff6f61; /* Coral border */
+            background-color: #2a2a3b; /* Darker input background */
+            color: #f8f9fa; /* Light text inside input */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 8px #ff6f61; /* Coral glow on focus */
+            border-color: #ff6f61;
+        }
+        .btn-primary {
+            background-color: #ff6f61; /* Coral button */
+            border: none;
+            border-radius: 12px; /* Rounded button */
+            font-weight: bold;
+            color: #ffffff; /* White text */
+        }
+        .btn-primary:hover {
+            background-color: #e85b50; /* Slightly darker coral on hover */
+            color: #ffffff;
+        }
+        .card {
+            background-color: #2a2a3b; /* Darker gray for the card */
+            border: none;
+            border-radius: 20px; /* More rounded card edges */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+        }
+        label {
+            font-weight: bold;
+            color: #ff6f61; /* Coral for labels */
+        }
+        .d-grid button {
+            transition: transform 0.2s ease-in-out; /* Smooth hover animation */
+        }
+        .d-grid button:hover {
+            transform: scale(1.05); /* Slight zoom on hover */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4">🚀 Resume Matcher</h2>
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Upload Resume (PDF)</label>
+                <input type="file" name="resume" class="form-control" accept=".pdf" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Upload Job Description (TXT)</label>
+                <input type="file" name="jd" class="form-control" accept=".txt" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Match Now</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

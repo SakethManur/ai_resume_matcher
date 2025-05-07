@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Match Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4">🎯 Matching Result</h2>
+
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><strong>Final Score:</strong> {{ final_score | round(2) }}/100</li>
+            <li class="list-group-item"><strong>Skills Match:</strong> {{ skill_perc | round(2) }}%</li>
+            <li class="list-group-item"><strong>Experience Match:</strong> {{ exp_perc | round(2) }}%</li>
+            <li class="list-group-item"><strong>Education Match:</strong> {{ edu_perc | round(2) }}%</li>
+        </ul>
+
+        {% if final_score >= 80 %}
+            <div class="alert alert-success text-center" role="alert">
+                🌟 Excellent match! You're highly suitable for this job.
+            </div>
+        {% elif final_score >= 60 %}
+            <div class="alert alert-warning text-center" role="alert">
+                👍 Good match, but there is room for improvement.
+            </div>
+        {% else %}
+            <div class="alert alert-danger text-center" role="alert">
+                ⚠️ Needs significant improvement to match the job.
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('index') }}" class="btn btn-success">🔙 Try Another Resume</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
