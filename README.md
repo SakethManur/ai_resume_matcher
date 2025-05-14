@@ -1,128 +1,110 @@
+# 🔍 Resume Matcher – Intelligent Resume Screening Application
 
-📄 Resume vs JD Matcher — Flask App
-✨ A smart, lightweight Resume vs Job Description Matcher built with Flask and Natural Language Processing (NLP).
+## 📌 Overview
 
-This app automatically analyzes a candidate’s Resume and compares it with a Job Description (JD) based on:
+**Resume Matcher** is an AI-powered web application built with **Flask** that automates the comparison of candidate resumes against job descriptions (JDs). By leveraging **Natural Language Processing (NLP)** with **spaCy**, the application extracts and analyzes core components such as skills, experience, and education from PDF resumes and `.txt` job descriptions to compute a **match score**.
 
-✅ Skills
+This tool streamlines the **pre-screening process** in recruitment pipelines, helping HR professionals and hiring managers make informed decisions faster.
 
-✅ Experience
+---
 
-✅ Education
+## 🚀 Key Features
 
-It generates a matching score to show how well the resume fits the job profile.
+- 📄 **PDF Resume Parsing** using `pdfplumber`
+- 🧠 **NLP-based Preprocessing** with `spaCy` (tokenization, lemmatization, stop-word removal)
+- 🛠️ **Keyword-based Skill Extraction** from a predefined technical skill set (e.g., Python, SQL, AWS, React)
+- 📊 **Quantitative Match Scoring**:
+  - **Skill Match**
+  - **Experience Match**
+  - **Education Match**
+- 🎯 **Final Weighted Score** based on configurable weights (skills: 50%, experience: 30%, education: 20%)
+- 📈 **Responsive Frontend** using `Bootstrap` and modern UI/UX design
+- 📥 Upload interface for resume (PDF) and job description (TXT)
+- 💡 Dynamic feedback (Excellent, Good, or Needs Improvement) based on match score thresholds
 
-🚀 Features
-📄 Upload Resume (PDF) and Job Description (Text) files.
+---
 
-✍️ Auto Extraction:
+## 🛠️ Tech Stack
 
-Skills
+- **Backend**: Python 3.x, Flask
+- **NLP**: spaCy (`en_core_web_sm`)
+- **PDF Processing**: pdfplumber
+- **Frontend**: HTML, CSS, Bootstrap 5
+- **File Handling**: Secure uploads with `os` module
+- **Regex**: Experience and education extraction using pattern matching
 
-Years of Experience
+---
 
-Education
+## 🧪 How It Works
 
-📊 Weighted Match Score:
+1. **User uploads** a resume (PDF) and a job description (TXT).
+2. The system:
+   - Parses and tokenizes both documents.
+   - Extracts skills, experience, and education credentials.
+3. **Score calculation** is performed based on:
+   - Skills overlap with JD
+   - Experience years relative to JD requirement
+   - Education match
+4. **Results rendered** via `result.html` with detailed percentage scores and a user-friendly recommendation.
 
-50% Skills
+---
 
-30% Experience
+## 📦 Dependencies
 
-20% Education
+Install via `pip install -r requirement.txt`:
 
-🌐 Simple Flask Web Interface
-
-🤖 Text Preprocessing using spaCy
-
-🛠️ Tech Stack
-Python 3.x
-
-Flask — Web framework
-
-pdfplumber — PDF text extraction
-
-spaCy — NLP with en_core_web_sm
-
-HTML/CSS — Frontend templates
-
-📂 Project Structure
-plaintext
-Copy
-Edit
-├── app.py
-├── templates/
-│   ├── index.html
-│   └── result.html
-├── uploads/
-├── requirements.txt
-└── README.md
-⚙️ Installation and Setup
-1. Clone the repository
-bash
-Copy
-Edit
-git clone https://github.com/your-username/resume-jd-matcher.git
-cd resume-jd-matcher
-2. Create a virtual environment (optional but recommended)
-bash
-Copy
-Edit
-python -m venv venv
-source venv/bin/activate   # On Windows: venv\Scripts\activate
-3. Install dependencies
-bash
-Copy
-Edit
-pip install -r requirements.txt
-4. Download the spaCy English model
-bash
-Copy
-Edit
-python -m spacy download en_core_web_sm
-5. Run the Flask app
-bash
-Copy
-Edit
-python app.py
-6. Open in browser
-Visit: http://127.0.0.1:5000/
-
-📋 How to Use
-Upload a Resume (PDF).
-
-Upload a Job Description (Text).
-
-Click Submit.
-
-View the Skill Match, Experience Match, Education Match, and the Final Score!
-
-📦 Requirements (requirements.txt)
-text
-Copy
-Edit
+```
 Flask
 pdfplumber
 spacy
-(You can generate this via: pip freeze > requirements.txt)
+```
 
-⚡ Future Enhancements
-🔍 Smarter skill extraction (phrases, multi-word terms).
+> Also ensure the spaCy model is downloaded:
 
-🎓 Support multiple degrees (Bachelor’s + Master’s).
+```bash
+python -m spacy download en_core_web_sm
+```
 
-🎨 Enhanced UI/UX (responsive and modern).
+---
 
-📄 Add DOCX/other format support.
+## 🧑‍💻 Usage
 
-☁️ Deployment on Heroku or AWS EC2.
+Run the Flask application:
 
-🙌 Acknowledgements
-Flask
+```bash
+python app.py
+```
 
-spaCy
+Open `http://localhost:5000` in your browser to start matching resumes against JDs.
 
-pdfplumber
+---
+
+## 📁 File Structure
+
+```
+.
+├── app.py                 # Main Flask backend logic
+├── requirement.txt        # Python dependencies
+├── index.html             # Upload UI (Resume + JD)
+├── result.html            # Match results display
+├── job_description.txt    # Sample JD for testing
+```
+
+---
+
+## ✅ Sample JD Input Format (TXT)
+
+```
+Skills needed: Python, Machine Learning
+Experience required: 0 years
+Education: Bachelor degree
+```
+
+---
+
+## 📬 Feedback
+
+This application is ideal for building HR tech solutions or resume-filtering systems in recruitment software.
 
 🧑‍💻 Author
 Made with ❤️ by Saketh Manur
