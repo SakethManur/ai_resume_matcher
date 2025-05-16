@@ -1,18 +1,26 @@
 # app.py
 
+from flask import Flask, render_template, request, jsonify
 import os
+import tempfile
 import pdfplumber
 import spacy
 import re
-from flask import Flask, render_template, request, jsonify
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Use temporary directory for uploads in serverless environment
+UPLOAD_FOLDER = tempfile.gettempdir()
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Load Spacy model
-nlp = spacy.load('en_core_web_sm')
+try:
+    nlp = spacy.load('en_core_web_sm')
+except OSError:
+    # Download the model if not available
+    os.system('python -m spacy download en_core_web_sm')
+    nlp = spacy.load('en_core_web_sm')
 
 # --------- Helper Functions --------- #
 def extract_text_from_pdf(pdf_path):
