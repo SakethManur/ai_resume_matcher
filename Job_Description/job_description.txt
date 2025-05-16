@@ -1,3 +1,0 @@
-Skills needed: Python, Machine Learning
-Experience required: 0 years
-Education: Bachelor degree

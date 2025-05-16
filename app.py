@@ -4,7 +4,7 @@ import os
 import pdfplumber
 import spacy
 import re
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -35,7 +35,7 @@ def extract_skills(tokens, skill_set):
     return list(extracted_skills)
 
 def extract_experience(text):
-    match = re.search(r'(\d+)\s+years', text.lower())
+    match = re.search(r'(\d+)\s*\+?\s*(?:years|yrs)', text.lower())
     if match:
         return int(match.group(1))
     return 0
@@ -43,8 +43,8 @@ def extract_experience(text):
 def extract_education(text):
     education_keywords = ['bachelor', 'master', 'b.tech', 'm.tech', 'phd', 'degree']
     for word in education_keywords:
-        if word in text.lower():
-            return word
+       if word in text.lower():
+        return word
     return None
 
 def calculate_match(resume_data, jd_data):
@@ -64,48 +64,63 @@ def calculate_match(resume_data, jd_data):
     return final_score, skill_match_percentage, experience_match_percentage, education_match_percentage
 
 # --------- Flask Routes --------- #
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        resume = request.files['resume']
-        jd = request.files['jd']
-
-        if resume and jd:
-            resume_path = os.path.join(app.config['UPLOAD_FOLDER'], resume.filename)
-            jd_path = os.path.join(app.config['UPLOAD_FOLDER'], jd.filename)
-            resume.save(resume_path)
-            jd.save(jd_path)
-
-            resume_text = extract_text_from_pdf(resume_path)
-            with open(jd_path, 'r', encoding='utf-8') as f:
-                jd_text = f.read()
-
-            skill_set = {"python", "java", "sql", "machine learning", "data analysis", "aws", "docker", "react", "c++", "cloud,","HTML","CSS",}
-
-            resume_tokens = preprocess(resume_text)
-            jd_tokens = preprocess(jd_text)
-
-            resume_data = {
-                'skills': extract_skills(resume_tokens, skill_set),
-                'experience': extract_experience(resume_text),
-                'education': extract_education(resume_text)
-            }
-
-            jd_data = {
-                'skills': extract_skills(jd_tokens, skill_set),
-                'experience': extract_experience(jd_text),
-                'education': extract_education(jd_text)
-            }
-
-            final_score, skill_perc, exp_perc, edu_perc = calculate_match(resume_data, jd_data)
-
-            # Clean up uploaded files
-            os.remove(resume_path)
-            os.remove(jd_path)
-
-            return render_template('result.html', final_score=final_score, skill_perc=skill_perc, exp_perc=exp_perc, edu_perc=edu_perc)
-
     return render_template('index.html')
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    resume = request.files['resume']
+    job_description = request.form['job_description']
+    job_title = request.form['job_title']
+    required_skills = request.form['required_skills']
+    required_experience = request.form.get('required_experience', '0')
+    required_education = request.form.get('required_education', '')
+
+    if not all([resume, job_description, job_title, required_skills]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        resume_path = os.path.join(app.config['UPLOAD_FOLDER'], resume.filename)
+        resume.save(resume_path)
+
+        resume_text = extract_text_from_pdf(resume_path)
+        # Combine job title and description for better context
+        jd_text = f"Job Title: {job_title}\n\nRequired Skills: {required_skills}\n\nExperience Required: {required_experience} years\n\nEducation Required: {required_education}\n\nJob Description:\n{job_description}"
+
+        skill_set = { "python", "java", "sql", "machine learning", "data analysis", "aws", "docker",
+                    "react", "c++", "cloud", "html", "css", "javascript", "typescript", "nodejs",
+                    "angular", "flask", "django", "kubernetes", "git", "github", "tensorflow",
+                    "pytorch", "scikit-learn", "numpy", "pandas", "matplotlib", "seaborn"}
+
+        resume_tokens = preprocess(resume_text)
+        jd_tokens = preprocess(jd_text)
+
+        resume_data = {
+            'skills': extract_skills(resume_tokens, skill_set),
+            'experience': extract_experience(resume_text),
+            'education': extract_education(resume_text)
+        }
+
+        jd_data = {
+            'skills': extract_skills(jd_tokens, skill_set),
+            'experience': extract_experience(jd_text),
+            'education': extract_education(jd_text)
+        }
+
+        final_score, skill_perc, exp_perc, edu_perc = calculate_match(resume_data, jd_data)
+
+        # Clean up uploaded file
+        os.remove(resume_path)
+
+        return jsonify({
+            'final_score': round(final_score, 2),
+            'skill_perc': round(skill_perc, 2),
+            'exp_perc': round(exp_perc, 2),
+            'edu_perc': round(edu_perc, 2)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 # --------- Run App --------- #
 if __name__ == "__main__":

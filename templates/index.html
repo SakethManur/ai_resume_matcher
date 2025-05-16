@@ -5,75 +5,439 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resume Matcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        body {
-            background-color: #1e1e2f; /* Vibrant dark purple background */
-            color: #f8f9fa; /* Light text for readability */
-            font-family: 'Arial', sans-serif;
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary-color: #ffffff;
+            --accent-color: #333333;
+            --text-color: #1f2937;
+            --light-text: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --body-bg: linear-gradient(135deg, #f5f7ff 0%, #e0e7ff 100%);
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --border-radius: 1rem;
+            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            color: #ff6f61; /* Vibrant coral for the header */
-            font-weight: bold;
+
+        [data-theme="dark"] {
+            --primary-color: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary-color: #1f2937;
+            --accent-color: #e5e7eb;
+            --text-color: #f3f4f6;
+            --card-bg: rgba(17, 24, 39, 0.95);
+            --body-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        .form-control {
-            border-radius: 12px; /* More rounded input fields */
-            border: 2px solid #ff6f61; /* Coral border */
-            background-color: #2a2a3b; /* Darker input background */
-            color: #f8f9fa; /* Light text inside input */
+
+        /* Initial loading screen */
+        .initial-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
-        .form-control:focus {
-            box-shadow: 0 0 8px #ff6f61; /* Coral glow on focus */
-            border-color: #ff6f61;
+
+        .bot-container {
+            text-align: center;
+            color: #f3f4f6;
         }
-        .btn-primary {
-            background-color: #ff6f61; /* Coral button */
-            border: none;
-            border-radius: 12px; /* Rounded button */
-            font-weight: bold;
-            color: #ffffff; /* White text */
+
+        .bot-animation {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1rem;
+            position: relative;
         }
-        .btn-primary:hover {
-            background-color: #e85b50; /* Slightly darker coral on hover */
-            color: #ffffff;
+
+        .bot-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #8b5cf6;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
-        .card {
-            background-color: #2a2a3b; /* Darker gray for the card */
-            border: none;
-            border-radius: 20px; /* More rounded card edges */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+
+        .bot-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #8b5cf6;
+            animation: float 3s ease-in-out infinite;
         }
-        label {
-            font-weight: bold;
-            color: #ff6f61; /* Coral for labels */
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+            top: 50%;
+            animation: scan 2s linear infinite;
         }
-        .d-grid button {
-            transition: transform 0.2s ease-in-out; /* Smooth hover animation */
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        .d-grid button:hover {
-            transform: scale(1.05); /* Slight zoom on hover */
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%); }
+            50% { transform: translate(-50%, -60%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-50px) translateZ(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(50px) translateZ(0); opacity: 0; }
         }
     </style>
 </head>
 <body>
-
-<div class="container mt-5">
-    <div class="card shadow p-4">
-        <h2 class="text-center mb-4">🚀 Resume Matcher</h2>
-        <form method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label class="form-label">Upload Resume (PDF)</label>
-                <input type="file" name="resume" class="form-control" accept=".pdf" required>
+    <div class="initial-loading" id="initialLoading">
+        <div class="bot-container">
+            <div class="bot-animation">
+                <div class="bot-circle"></div>
+                <div class="bot-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="scanning-line"></div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Upload Job Description (TXT)</label>
-                <input type="file" name="jd" class="form-control" accept=".txt" required>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Match Now</button>
-            </div>
-        </form>
+            <h3>Initializing Resume Matcher</h3>
+            <p>Setting up the intelligent analysis system...</p>
+        </div>
     </div>
-</div>
 
+    <button class="theme-switch" id="theme-switch" title="Toggle dark mode">
+        <i class="fas fa-sun"></i>
+    </button>
+
+    <div class="container">
+        <div class="card p-4 mb-4">
+            <h1 class="text-center section-title mb-4">
+                <i class="fas fa-file-search"></i>
+                Resume Matcher
+            </h1>
+            
+            <form id="matchForm" enctype="multipart/form-data">
+                <div class="field-container upload-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-upload"></i>
+                        Upload Resume
+                    </h3>
+                    <div class="mb-3">
+                        <label class="form-label">Resume File (PDF)</label>
+                        <input type="file" name="resume" class="form-control" accept=".pdf" required>
+                    </div>
+                </div>
+
+                <div class="field-container requirements-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-briefcase"></i>
+                        Job Requirements
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" name="job_title" class="form-control" required 
+                               placeholder="e.g., Senior Software Engineer">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Required Skills</label>
+                        <textarea name="required_skills" class="form-control" rows="3" required
+                                  placeholder="Enter skills separated by commas&#10;e.g., Python, JavaScript, AWS, Docker"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Experience
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <input type="number" name="required_experience" id="required_experience" 
+                               class="form-control" min="0" max="40"
+                               placeholder="Years of experience required">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Education Level
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <select name="required_education" class="form-control">
+                            <option value="">Select Education Level</option>
+                            <option value="bachelor">Bachelor's Degree</option>
+                            <option value="master">Master's Degree</option>
+                            <option value="phd">PhD</option>
+                            <option value="b.tech">B.Tech</option>
+                            <option value="m.tech">M.Tech</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Job Description</label>
+                        <textarea name="job_description" class="form-control" rows="6" required
+                                  placeholder="Enter the detailed job description..."></textarea>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-magic me-2"></i>
+                        Analyze Resume
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="results" class="card p-4">
+            <h2 class="section-title text-center mb-4">
+                <i class="fas fa-chart-pie"></i>
+                Analysis Results
+            </h2>
+            
+            <div class="result-item">
+                <div class="result-label">Overall Match</div>
+                <div class="result-score" id="final_score">0%</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Skills Match</div>
+                <div class="result-score" id="skill_perc">0%</div>
+            </div>
+            
+            <div class="result-item" id="experience_result">
+                <div class="result-label">Experience Match</div>
+                <div class="result-score" id="exp_perc">0%</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Education Match</div>
+                <div class="result-score" id="edu_perc">0%</div>
+            </div>
+
+            <div id="match_message" class="alert mt-4 text-center" role="alert"></div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading">
+        <div class="loading-content text-center">
+            <div class="spinner mb-3"></div>
+            <h3 class="text-primary mb-2">Analyzing Resume</h3>
+            <p class="text-muted">Please wait while we process your resume...</p>
+        </div>
+    </div>
+
+    <script>
+        // Set dark theme by default
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+
+        // Initial loading animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialLoading = document.getElementById('initialLoading');
+            
+            // Show initial loading for 3 seconds
+            setTimeout(() => {
+                gsap.to(initialLoading, {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        initialLoading.style.display = 'none';
+                        startPageAnimations();
+                    }
+                });
+            }, 3000);
+        });
+
+        // Main page animations
+        function startPageAnimations() {
+            gsap.to('.container', {
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out'
+            });
+
+            gsap.to('.theme-switch', {
+                opacity: 1,
+                scale: 1,
+                duration: 0.5,
+                ease: 'back.out(1.7)'
+            });
+
+            gsap.to('.card', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power2.out'
+            });
+
+            gsap.to('.section-title', {
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: 'power2.out'
+            });
+
+            gsap.to('.field-container', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: 'power2.out'
+            });
+        }
+
+        // Form submission handler
+        document.getElementById('matchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            // Show loading animation
+            gsap.to(loading, {
+                display: 'flex',
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: new FormData(this)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                gsap.to(loading, {
+                    opacity: 0,
+                    duration: 0.3,
+                    display: 'none',
+                    ease: 'power2.in'
+                });
+
+                // Show results
+                results.style.display = 'block';
+                gsap.fromTo('#results', 
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }
+                );
+
+                // Animate score counters
+                gsap.to('#final_score', {
+                    innerText: data.final_score,
+                    duration: 1,
+                    snap: { innerText: 1 }
+                });
+
+                gsap.to('#skill_perc', {
+                    innerText: data.skill_perc,
+                    duration: 1,
+                    snap: { innerText: 1 }
+                });
+
+                // Handle experience section
+                const expElement = document.getElementById('experience_result');
+                const expValue = document.getElementById('required_experience').value;
+                if (expValue && expValue !== '0') {
+                    expElement.style.display = 'flex';
+                    gsap.to('#exp_perc', {
+                        innerText: data.exp_perc,
+                        duration: 1,
+                        snap: { innerText: 1 }
+                    });
+                } else {
+                    expElement.style.display = 'none';
+                }
+
+                gsap.to('#edu_perc', {
+                    innerText: data.edu_perc,
+                    duration: 1,
+                    snap: { innerText: 1 }
+                });
+
+                // Set match message with animation
+                const messageDiv = document.getElementById('match_message');
+                let messageClass, messageText;
+                
+                if (data.final_score >= 80) {
+                    messageClass = 'alert-success';
+                    messageText = '<i class="fas fa-star me-2"></i>Excellent match! You\'re highly suitable for this job.';
+                } else if (data.final_score >= 60) {
+                    messageClass = 'alert-warning';
+                    messageText = '<i class="fas fa-thumbs-up me-2"></i>Good match, but there\'s room for improvement.';
+                } else {
+                    messageClass = 'alert-danger';
+                    messageText = '<i class="fas fa-exclamation-triangle me-2"></i>Needs significant improvement to match the job requirements.';
+                }
+
+                messageDiv.className = `alert ${messageClass} text-center`;
+                messageDiv.innerHTML = messageText;
+                gsap.fromTo(messageDiv, 
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.5, delay: 0.5 }
+                );
+            })
+            .catch(error => {
+                gsap.to(loading, {
+                    opacity: 0,
+                    duration: 0.3,
+                    display: 'none'
+                });
+                console.error('Error:', error);
+                alert('An error occurred while processing the resume. Please try again.');
+            });
+        });
+
+        // Theme switch handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSwitch = document.getElementById('theme-switch');
+            
+            // Theme toggle with animation
+            themeSwitch.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                gsap.to(themeSwitch, {
+                    rotate: 180,
+                    duration: 0.5,
+                    ease: 'power2.inOut',
+                    onComplete: () => {
+                        themeSwitch.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                        gsap.to(themeSwitch, {
+                            rotate: 360,
+                            duration: 0.5,
+                            ease: 'power2.inOut'
+                        });
+                    }
+                });
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
 </body>
 </html>

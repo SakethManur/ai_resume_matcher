@@ -2,10 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Match Result</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1e1e2f; /* Vibrant dark purple background */
+            color: #f8f9fa; /* Light text for readability */
+            font-family: 'Arial', sans-serif;
+        }
+        h2 {
+            color: #ff6f61; /* Vibrant coral for the header */
+            font-weight: bold;
+        }
+        .card {
+            background-color: #2a2a3b; /* Darker gray for the card */
+            border: none;
+            border-radius: 20px; /* More rounded card edges */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+        }
+        .list-group-item {
+            background-color: #2a2a3b; /* Match card background */
+            color: #f8f9fa; /* Light text */
+            border: 1px solid #ff6f61; /* Coral border */
+            border-radius: 10px; /* Rounded list items */
+        }
+        .alert {
+            border-radius: 12px; /* Rounded alerts */
+        }
+        .btn-success {
+            background-color: #ff6f61; /* Coral button */
+            border: none;
+            border-radius: 12px; /* Rounded button */
+            font-weight: bold;
+            color: #ffffff; /* White text */
+        }
+        .btn-success:hover {
+            background-color: #e85b50; /* Slightly darker coral on hover */
+            color: #ffffff;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
 <div class="container mt-5">
     <div class="card shadow p-4">
