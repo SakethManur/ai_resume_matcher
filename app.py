@@ -6,9 +6,28 @@ import tempfile
 import pdfplumber
 import spacy
 import re
+import logging
+from logging.handlers import RotatingFileHandler
+from datetime import datetime
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Add file handler for logging
+log_dir = os.path.join(tempfile.gettempdir(), 'resume_matcher_logs')
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, 'resume_matcher.log')
+file_handler = RotatingFileHandler(log_file, maxBytes=10485760, backupCount=5)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+))
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
+logger.info('Resume Matcher startup')
 
 # Use temporary directory for uploads in serverless environment
 UPLOAD_FOLDER = tempfile.gettempdir()
@@ -17,10 +36,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Load Spacy model
 try:
     nlp = spacy.load('en_core_web_sm')
+    logger.info('Successfully loaded spaCy model')
 except OSError:
-    # Download the model if not available
+    logger.warning('spaCy model not found, downloading now...')
     os.system('python -m spacy download en_core_web_sm')
     nlp = spacy.load('en_core_web_sm')
+    logger.info('Successfully downloaded and loaded spaCy model')
 
 # --------- Helper Functions --------- #
 def extract_text_from_pdf(pdf_path):
@@ -78,6 +99,7 @@ def index():
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
+    logger.info('Received analyze request')
     resume = request.files['resume']
     job_description = request.form['job_description']
     job_title = request.form['job_title']
@@ -86,13 +108,17 @@ def analyze():
     required_education = request.form.get('required_education', '')
 
     if not all([resume, job_description, job_title, required_skills]):
+        logger.error('Missing required fields in request')
         return jsonify({'error': 'Missing required fields'}), 400
 
     try:
         resume_path = os.path.join(app.config['UPLOAD_FOLDER'], resume.filename)
         resume.save(resume_path)
+        logger.info(f'Successfully saved resume: {resume.filename}')
 
         resume_text = extract_text_from_pdf(resume_path)
+        logger.info('Successfully extracted text from PDF')
+
         # Combine job title and description for better context
         jd_text = f"Job Title: {job_title}\n\nRequired Skills: {required_skills}\n\nExperience Required: {required_experience} years\n\nEducation Required: {required_education}\n\nJob Description:\n{job_description}"
 
@@ -103,23 +129,28 @@ def analyze():
 
         resume_tokens = preprocess(resume_text)
         jd_tokens = preprocess(jd_text)
+        logger.info('Successfully preprocessed resume and job description')
 
         resume_data = {
             'skills': extract_skills(resume_tokens, skill_set),
             'experience': extract_experience(resume_text),
             'education': extract_education(resume_text)
         }
+        logger.info(f'Extracted resume data: {resume_data}')
 
         jd_data = {
             'skills': extract_skills(jd_tokens, skill_set),
             'experience': extract_experience(jd_text),
             'education': extract_education(jd_text)
         }
+        logger.info(f'Extracted job description data: {jd_data}')
 
         final_score, skill_perc, exp_perc, edu_perc = calculate_match(resume_data, jd_data)
+        logger.info(f'Calculated scores - Final: {final_score}, Skills: {skill_perc}, Experience: {exp_perc}, Education: {edu_perc}')
 
         # Clean up uploaded file
         os.remove(resume_path)
+        logger.info('Cleaned up temporary files')
 
         return jsonify({
             'final_score': round(final_score, 2),
@@ -128,8 +159,10 @@ def analyze():
             'edu_perc': round(edu_perc, 2)
         })
     except Exception as e:
+        logger.error(f'Error processing request: {str(e)}', exc_info=True)
         return jsonify({'error': str(e)}), 400
 
 # --------- Run App --------- #
 if __name__ == "__main__":
+    logger.info('Starting Flask app')
     app.run(debug=True)
