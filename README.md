@@ -87,20 +87,7 @@ Open `http://localhost:5000` in your browser to start matching resumes against J
 ├── requirement.txt        # Python dependencies
 ├── index.html             # Upload UI (Resume + JD)
 ├── result.html            # Match results display
-├── job_description.txt    # Sample JD for testing
 ```
-
----
-
-## ✅ Sample JD Input Format (TXT)
-
-```
-Skills needed: Python, Machine Learning
-Experience required: 0 years
-Education: Bachelor degree
-```
-
----
 
 ## 📬 Feedback
 
